@@ -96,3 +96,28 @@ test('12 meses con datos introducidos siguen sin verificación externa',()=>{
  assert.ok(r.warnings.some(w=>w.includes('no se han verificado')));
  assert.equal(r.hasAutomaticRecommendation,false);
 });
+
+
+test('resumen anual confirmado sustituye la carga de 24 datos mensuales sin inventar meses',()=>{
+ const empty=Array.from({length:12},()=>({p1:'',p2:''}));
+ const r=report({months:empty,annualMaxP1:'3,9',annualMaxP2:'4,5',annualPeriodConfirmed:true});
+ assert.equal(r.fullHistory,true);
+ assert.equal(r.dataMode,'resumen-anual');
+ assert.equal(r.historyMonths,0);
+ assert.equal(r.maxP1,3.9);
+ assert.equal(r.maxP2,4.5);
+ assert.ok(r.warnings.some(w=>w.includes('declarada por el usuario')));
+});
+test('resumen anual sin confirmación expresa no activa historial completo',()=>{
+ const empty=Array.from({length:12},()=>({p1:'',p2:''}));
+ const r=report({months:empty,annualMaxP1:'3,9',annualMaxP2:'4,5'});
+ assert.equal(r.fullHistory,false);
+ assert.equal(r.scenario.peakCheck,'sin-historial');
+});
+test('dos máximas anuales obligatorias si se usa el resumen',()=>{
+ const empty=Array.from({length:12},()=>({p1:'',p2:''}));
+ assert.throws(()=>report({months:empty,annualMaxP1:'3,9',annualMaxP2:'',annualPeriodConfirmed:true}),RangeError);
+});
+test('no se silencian discrepancias entre tabla mensual completa y resumen anual',()=>{
+ assert.throws(()=>report({annualMaxP1:'12',annualMaxP2:'4,5',annualPeriodConfirmed:true}),RangeError);
+});
