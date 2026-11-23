@@ -21,7 +21,7 @@ test('decimales inválidos se rechazan',()=>assert.throws(()=>parseDecimal('3,1,
 test('12 máximos mensuales independientes P1/P2 sin forzar valle mayor',()=>{
  const r=report({targetP1:'5',targetP2:'4'});
  assert.equal(r.fullHistory,true);assert.equal(r.historyMonths,12);
- assert.equal(r.maxP1,3.9);assert.equal(r.maxP2,4.5);
+ assert.ok(Math.abs(r.maxP1-3.9)<1e-9);assert.ok(Math.abs(r.maxP2-4.5)<1e-9);
  assert.equal(r.currentP1,5.75);assert.equal(r.currentP2,4.6);
  assert.equal(r.scenario.targetP1,5);assert.equal(r.scenario.targetP2,4);
 });
