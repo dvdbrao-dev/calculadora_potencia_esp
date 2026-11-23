@@ -55,9 +55,26 @@ export function evaluate2TD(input){
     return {p1,p2,complete:p1!==null&&p2!==null};
   });
   const complete=measured.filter(m=>m.complete).length;
-  const full=complete===MONTHS_REQUIRED;
-  const maxP1=full?Math.max(...measured.map(m=>m.p1)):null;
-  const maxP2=full?Math.max(...measured.map(m=>m.p2)):null;
+  const fullMonthly=complete===MONTHS_REQUIRED;
+  const annualOne=input.annualMaxP1!==undefined&&input.annualMaxP1!==null&&String(input.annualMaxP1).trim()!==''
+    ||input.annualMaxP2!==undefined&&input.annualMaxP2!==null&&String(input.annualMaxP2).trim()!=='';
+  let annualP1=null,annualP2=null;
+  if(annualOne){
+    annualP1=parseDecimal(input.annualMaxP1,{name:'Máxima anual P1',min:0.01,max:30});
+    annualP2=parseDecimal(input.annualMaxP2,{name:'Máxima anual P2',min:0.01,max:30});
+  }
+  const annualPeriodConfirmed=input.annualPeriodConfirmed===true||input.annualPeriodConfirmed==='on';
+  const fullAnnual=annualP1!==null&&annualP2!==null&&annualPeriodConfirmed;
+  if(fullMonthly&&annualP1!==null){
+    const p1Monthly=Math.max(...measured.map(m=>m.p1)),p2Monthly=Math.max(...measured.map(m=>m.p2));
+    if(Math.abs(p1Monthly-annualP1)>.05||Math.abs(p2Monthly-annualP2)>.05){
+      throw new RangeError('Las máximas del resumen anual discrepan de las máximas de la tabla mensual. Revisa ambas fuentes.');
+    }
+  }
+  const full=fullMonthly||fullAnnual;
+  const dataMode=fullMonthly?'mensual':(fullAnnual?'resumen-anual':'incompleto');
+  const maxP1=fullMonthly?Math.max(...measured.map(m=>m.p1)):(fullAnnual?annualP1:null);
+  const maxP2=fullMonthly?Math.max(...measured.map(m=>m.p2)):(fullAnnual?annualP2:null);
   const hasOneCandidate=input.targetP1!==undefined&&input.targetP1!==null&&String(input.targetP1).trim()!==''
     ||input.targetP2!==undefined&&input.targetP2!==null&&String(input.targetP2).trim()!=='';
   let targetP1=null,targetP2=null;
@@ -81,6 +98,9 @@ export function evaluate2TD(input){
   if(!['yes','no','unknown'].includes(cutoffs)||!['yes','no','unknown'].includes(changes))throw new RangeError('Revisa las incidencias');
   const warnings=[];
   if(!full)warnings.push('Historial incompleto: '+complete+'/12 meses con máximas P1 y P2. No se puede comprobar el escenario frente a un año completo.');
+  if(annualOne&&!annualPeriodConfirmed&&!fullMonthly)warnings.push('El resumen no confirma 12 meses completos. No sirve para comparar un año.');
+  if(dataMode==='resumen-anual')warnings.push('La cobertura de 12 meses del resumen anual ha sido declarada por el usuario, no verificada; confirma fechas y origen.');
+  if(dataMode==='resumen-anual'&&complete>0)warnings.push('Se han introducido algunas filas mensuales pero no las 12: se compara solo con el resumen anual declarado.');
   if(source==='unknown')warnings.push('Indica si los máximos proceden de la distribuidora o de las facturas; no se han verificado externamente.');
   if(source==='otro')warnings.push('Confirma que los valores sean máximas demandas por periodo expresadas en kW; las curvas de consumo en kWh no son equivalentes.');
   if(cutoffs==='yes')warnings.push('Hay cortes o actuaciones del control de potencia: requiere diagnóstico antes de modificar el contrato.');
@@ -121,7 +141,7 @@ export function evaluate2TD(input){
     }
   }
   return {
-    tariff:'2.0TD',currentP1,currentP2,historyMonths:complete,fullHistory:full,
+    tariff:'2.0TD',currentP1,currentP2,historyMonths:complete,fullHistory:full,dataMode,
     maxP1,maxP2,source,cutoffs,changes,warnings,scenario,
     hasAutomaticRecommendation:false,
     status:!full?'datos-insuficientes':(!scenario?'historial-completo':scenario.peakCheck),
