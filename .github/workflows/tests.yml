@@ -15,4 +15,4 @@ jobs:
       - run: node --version
       - run: node --check calculator.mjs
       - run: node --check app.mjs
-      - run: node --test tests/calculator.test.mjs
+      - run: node --test tests/*.test.mjs

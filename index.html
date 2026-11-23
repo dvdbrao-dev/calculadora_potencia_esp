@@ -1,101 +1,145 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#007887">
-<meta name="description" content="Calculadora orientativa de potencia contratada en viviendas. Simula tu demanda en punta y valle y compara el coste con los precios reales de tu factura. Mejoradora Granada.">
-<title>Calculadora de potencia de vivienda | Mejoradora Granada</title>
+<meta name="description" content="Revisa la potencia contratada de tu vivienda con Mejoradora Granada. Cuestionario orientativo y simulador 2.0TD basado en las máximas demandas reales de 12 meses.">
+<meta name="robots" content="index,follow">
+<title>Revisión de potencia eléctrica de vivienda | Mejoradora Granada</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css">
-<script src="/app.mjs" type="module"></script>
+<link rel="stylesheet" href="/styles.css"><script type="module" src="/app.mjs"></script>
 </head>
 <body>
-<a class="skip" href="#calculadora">Saltar a la calculadora</a>
+<a class="skip" href="#modos">Saltar a la herramienta</a>
 <header class="site-header"><div class="container header-inner">
- <a class="logo" href="https://mejoradoragranada.es/" aria-label="Mejoradora Granada"><img src="https://mejoradoragranada.es/logo-mejoradora-granada.png" alt="Mejoradora Granada" width="210" height="74"></a>
- <div class="header-right"><span class="header-tag">Herramienta gratuita</span><a href="https://mejoradoragranada.es/">Volver a la web ↗</a></div>
+  <a href="https://mejoradoragranada.es/" aria-label="Ir a Mejoradora Granada" class="logo"><img src="https://mejoradoragranada.es/logo-mejoradora-granada.png" width="210" height="74" alt="Mejoradora Granada"></a>
+  <nav class="header-right" aria-label="Navegación"><span class="header-tag">Herramienta gratuita</span><a href="https://mejoradoragranada.es/">Volver a la web ↗</a></nav>
 </div></header>
 <main>
-<section class="hero"><div class="container hero-inner">
- <div class="hero-content"><span class="kicker">▸ Ahorro energético sin complicaciones</span>
-  <h1>¿Tienes contratada la <em>potencia que necesitas?</em></h1>
-  <p>No te quedes con una cifra al azar. Cuéntanos cómo es tu vivienda y descubre si tiene sentido revisar tu potencia eléctrica.</p>
-  <div class="hero-actions"><a class="btn btn-white" href="#calculadora">Calcular mi potencia <span>↓</span></a><span>Gratis · Sin registro · Sin subir facturas</span></div>
- </div>
- <div class="hero-decoration" aria-hidden="true"><div class="decor-circle"></div><div class="decor-card"><span class="decor-small">TU VIVIENDA EN NÚMEROS</span><span class="decor-bolt">ϟ</span><span class="decor-label">Potencia eléctrica</span><strong>kW</strong><div class="decor-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="decor-bottom">Un cálculo claro para decidir mejor ↗</span></div></div>
-</div></section>
-<div class="progress-band"><div class="container progress-inner"><span><b>01</b> Tu vivienda</span><span><b>02</b> Equipos y hábitos</span><span><b>03</b> Resultado por periodos</span></div></div>
-<section class="calculator" id="calculadora">
-<div class="container">
- <div class="section-intro"><span class="eyebrow">HERRAMIENTA DE ESTIMACIÓN</span><h2>Tu estudio de potencia, paso a paso.</h2><p>Rellena los datos y obtén una simulación orientativa. No almacenamos la información que escribas.</p></div>
- <div class="workspace">
- <form id="form" class="form-grid">
-  <fieldset class="panel"><legend><span class="step">01</span> Datos de tu vivienda</legend>
-   <p class="panel-description">La potencia contratada aparece en tu factura, normalmente separada en punta (P1) y valle (P2).</p>
-   <div class="fields three">
-    <label>Potencia actual P1 (kW) <sup>*</sup><input type="number" name="actualP1" min="0.5" max="25" step="0.01" inputmode="decimal" placeholder="Ej.: 5,75" required><small>Periodo punta</small></label>
-    <label>Personas en casa <sup>*</sup><input type="number" name="personas" min="1" max="20" step="1" value="3" required></label>
-    <label>Superficie aproximada (m²) <sup>*</sup><input type="number" name="m2" min="20" max="1000" step="1" value="90" required></label>
-   </div>
-   <details class="detail"><summary>Tengo distinta potencia contratada en P2 (valle)</summary><label class="single-field">Potencia P2 (kW)<input type="number" name="actualP2" min="0.5" max="25" step="0.01" inputmode="decimal" placeholder="En blanco = igual que P1"><small>En fines de semana y festivos nacionales, todo el día es periodo valle.</small></label></details>
-  </fieldset>
-  <fieldset class="panel"><legend><span class="step">02</span> Sistemas principales</legend>
-   <p class="panel-description">Estos equipos determinan gran parte del pico de consumo de la vivienda.</p>
-   <div class="fields three">
-    <label>Cocina principal<select name="cocina"><option value="gas">Gas / butano</option><option value="vitro">Vitrocerámica clásica</option><option value="induccion" selected>Inducción</option></select></label>
-    <label>Agua caliente<select name="acs"><option value="gas">Gas / butano</option><option value="termo" selected>Termo eléctrico</option><option value="aerotermia">Aerotermia</option></select></label>
-    <label>Climatización<select name="clima"><option value="no">Ninguna / gas / leña</option><option value="aire" selected>Aire acondicionado</option><option value="radiadores">Radiadores eléctricos</option><option value="aerotermia">Aerotermia</option></select></label>
-   </div>
-  </fieldset>
-  <fieldset class="panel"><legend><span class="step">03</span> Electrodomésticos</legend>
-   <p class="panel-description">Marca los que tienes. No sumaremos todas las potencias nominales sin considerar su simultaneidad.</p>
-   <div class="checks">
-    <label class="check"><input name="horno" type="checkbox" checked><span class="icon">♨</span><span>Horno eléctrico</span><span class="tick">✓</span></label>
-    <label class="check"><input name="micro" type="checkbox" checked><span class="icon">▤</span><span>Microondas</span><span class="tick">✓</span></label>
-    <label class="check"><input name="lavadora" type="checkbox" checked><span class="icon">◉</span><span>Lavadora</span><span class="tick">✓</span></label>
-    <label class="check"><input name="lavavajillas" type="checkbox" checked><span class="icon">≋</span><span>Lavavajillas</span><span class="tick">✓</span></label>
-    <label class="check"><input name="secadora" type="checkbox"><span class="icon">◌</span><span>Secadora</span><span class="tick">✓</span></label>
-    <label class="check"><input name="congelador" type="checkbox"><span class="icon">❄</span><span>Congelador extra</span><span class="tick">✓</span></label>
-   </div>
-  </fieldset>
-  <fieldset class="panel"><legend><span class="step">04</span> Extras y hábitos</legend>
-   <div class="fields two">
-    <label>Vehículo eléctrico<select name="ve"><option value="no">No tengo</option><option value="lenta">Enchufe normal (2,3 kW)</option><option value="medio">Wallbox (3,7 kW)</option><option value="alto">Wallbox (7,4 kW)</option></select></label>
-    <label>Otros motores (kW)<input name="motores" type="number" min="0" max="15" step="0.1" inputmode="decimal" value="0"><small>Bombas u otros equipos eléctricos</small></label>
-   </div>
-   <label class="inline-check"><input name="piscina" type="checkbox"> Tengo depuradora de piscina</label>
-   <div class="usage"><strong>¿Sueles utilizar varios equipos potentes a la vez?</strong><div class="choice"><label><input type="radio" name="uso" value="normal" checked><span>Uso habitual</span></label><label><input type="radio" name="uso" value="intenso"><span>Alta simultaneidad</span></label></div><small>El escenario de alta simultaneidad utiliza una hipótesis más conservadora.</small></div>
-  </fieldset>
-  <details class="panel prices"><summary><span class="step">05</span> Estimar diferencia de coste <small>Opcional</small></summary>
-    <p class="panel-description">Pon los precios del <strong>término de potencia</strong> de tu factura en €/kW/día. No utilizamos tarifas de Internet.</p>
-    <div class="fields two">
-      <label>Precio potencia P1 (€/kW/día)<input type="number" name="precioP1" min="0" max="5" step="0.000001" inputmode="decimal" placeholder="Ej.: 0,085"></label>
-      <label>Precio potencia P2 (€/kW/día)<input type="number" name="precioP2" min="0" max="5" step="0.000001" inputmode="decimal" placeholder="Ej.: 0,012"></label>
-    </div><p class="fineprint">Cálculo a 365 días. No incluye impuestos, coste de cambios ni variaciones futuras de tarifa.</p>
-  </details>
-  <div class="form-bottom"><p id="error" class="error" role="alert" hidden></p><button class="btn btn-primary" type="submit">Calcular mi estudio <span>→</span></button><span>No modifica ningún contrato automáticamente.</span></div>
- </form>
- <aside class="sidebar"><div class="side-card"><span class="eyebrow">ANTES DE EMPEZAR</span><div class="house" aria-hidden="true">⌂<span>⚡</span></div><h3>Conoce tu potencia antes de cambiarla.</h3><p>Contratar de más encarece el término fijo. Quedarse corto puede producir cortes. La clave es la demanda real cuando coinciden varios aparatos.</p><hr><ul><li>✓ Estimación para viviendas</li><li>✓ P1 punta y P2 valle</li><li>✓ Sin registro ni llamadas</li></ul><p class="side-last">Si quieres tramitar algo, primero revisaremos tu factura.</p></div></aside>
- </div>
- <section class="result" id="resultado" hidden aria-live="polite" aria-labelledby="resultado-title">
-  <div class="result-title"><div><span class="eyebrow">TU ESTIMACIÓN</span><h2 id="resultado-title">Así podría quedar tu potencia.</h2></div><button id="editar" class="edit" type="button">Modificar datos ↑</button></div>
-  <div class="metrics">
-   <div class="metric highlighted"><span>Potencia orientativa P1 · Punta</span><strong id="p1">—</strong><small>kW</small></div>
-   <div class="metric highlighted"><span>Potencia orientativa P2 · Valle</span><strong id="p2">—</strong><small>kW</small></div>
-   <div class="metric"><span>Potencia actual P1 / P2</span><strong id="actual">—</strong></div>
-   <div class="metric"><span>Diferencia anual estimada</span><strong id="dinero">—</strong><small id="dinero-desc">Solo con precios de factura</small></div>
+<section class="hero"><div class="container hero-inner"><div class="hero-content">
+  <span class="kicker">▸ Consultoría energética clara</span>
+  <h1>La potencia de tu casa, <em>con datos reales.</em></h1>
+  <p>Una primera orientación sin inventar cifras. Y, si tienes tus máximas demandas, un simulador que te muestra qué cambiaría en el término fijo de tu factura.</p>
+  <a href="#modos" class="btn btn-white">Empezar revisión <span aria-hidden="true">↓</span></a>
+  <p class="hero-note">Sin registro · Sin subir facturas · Sin ahorro prometido</p>
+</div><div class="hero-art" aria-hidden="true"><div class="art-mark">⌁</div><div class="art-card"><span>LA DIFERENCIA ESTÁ EN LOS DATOS</span><strong>P1 <b>+</b> P2</strong><small>Dos potencias · Una decisión informada</small><div class="art-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div></div></section>
+<div class="progress-band"><div class="container progress-inner"><span><b>01</b> Conoce tu caso</span><span><b>02</b> Contrasta medidas</span><span><b>03</b> Decide con un asesor</span></div></div>
+
+<section class="work-section" id="modos"><div class="container">
+  <div class="section-intro"><span class="eyebrow">ANÁLISIS DE POTENCIA 2.0TD</span><h2>Elige cómo quieres empezar.</h2><p>Una orientación doméstica no equivale a recomendar una potencia contratada. Para estudiar un cambio de verdad, hacen falta datos de demanda.</p></div>
+  <div class="mode-tabs" role="tablist" aria-label="Modalidad del estudio">
+    <button type="button" id="tab-quick" role="tab" aria-controls="quick-pane" aria-selected="true" class="mode-tab active"><span class="mode-icon">⌂</span><span><strong>Orientación rápida</strong><small>Equipos y hábitos · Sin kW inventados</small></span></button>
+    <button type="button" id="tab-advanced" role="tab" aria-controls="advanced-pane" aria-selected="false" class="mode-tab"><span class="mode-icon">▥</span><span><strong>Simulador con datos reales</strong><small>Máximas demandas P1/P2 · Escenarios de coste</small></span></button>
   </div>
-  <div id="aviso" class="notice"></div>
-  <div class="explanation"><h3>Cómo interpretar el resultado</h3><p id="explicacion"></p><p>La simulación aplica un margen del 10 %, y asume que los fines de semana también pueden producirse picos de consumo en el periodo valle. En caso de vehículo eléctrico, no presupone gestión dinámica de carga.</p><p><strong>Importante:</strong> nunca reduzcas o aumentes potencia únicamente por esta estimación. Una decisión fiable requiere revisar máximas demandas, incidencias de ICP, hábitos reales e instalación eléctrica. La potencia de diseño exigida por el REBT no equivale a la potencia óptima contratada.</p></div>
-  <div class="result-cta"><div><h3>¿Comprobamos si de verdad compensa?</h3><p>Envíanos tu factura y revisaremos los datos reales. Si no hay ahorro, también te lo diremos.</p></div><a id="whatsapp" class="btn btn-white" target="_blank" rel="noopener noreferrer" href="https://wa.me/34613685560">Consultar por WhatsApp ↗</a></div>
- </section>
-</div>
-</section>
-<section class="closing"><div class="container closing-inner"><div><span class="eyebrow">SIN PROMESAS FÁCILES</span><h2>La calculadora orienta. La factura decide.</h2></div><p>Dos hogares similares pueden necesitar potencias distintas. Mejoradora Granada revisa el uso real, los precios y las condiciones para determinar si existe una mejora posible.</p></div></section>
+
+  <section id="quick-pane" role="tabpanel" aria-labelledby="tab-quick" class="mode-pane">
+    <div class="two-column">
+      <form id="quick-form" class="panel" novalidate>
+        <h3><span class="step">01</span> Cuéntanos qué equipos utilizas</h3>
+        <p class="panel-description">Esto sirve para identificar preguntas importantes, no para atribuir una potencia exacta a tu vivienda.</p>
+        <div class="fields two">
+          <label>Cocina principal<select name="cooking"><option value="gas">Gas o butano</option><option value="vitro">Vitrocerámica</option><option value="induccion" selected>Inducción</option></select></label>
+          <label>Agua caliente<select name="hotWater"><option value="gas">Gas o butano</option><option value="termo" selected>Termo eléctrico</option><option value="aerotermia">Aerotermia</option></select></label>
+          <label>Climatización<select name="climate"><option value="none">Sin climatización eléctrica</option><option value="aire" selected>Aire acondicionado</option><option value="radiadores">Radiadores eléctricos</option><option value="aerotermia">Aerotermia</option></select></label>
+          <label>Carga de vehículo eléctrico<select name="ev"><option value="none">No tengo</option><option value="schuko">Enchufe convencional</option><option value="wallbox">Punto de recarga</option></select></label>
+        </div>
+        <label class="inline-check"><input type="checkbox" name="pool"> Tengo piscina, bombas o motores importantes</label>
+        <button type="submit" class="btn btn-primary">Ver qué debería revisar <span aria-hidden="true">→</span></button>
+      </form>
+      <aside class="info-panel"><span class="eyebrow">POR QUÉ NO DAMOS UNA CIFRA</span><h3>Dos viviendas iguales pueden necesitar potencias distintas.</h3><p>Lo que importa no es solo qué aparatos tienes, sino cuáles funcionan juntos, cuándo lo hacen y qué ha registrado tu contador.</p><div class="info-points"><span>✓ Sin fórmulas de simultaneidad arbitrarias</span><span>✓ Sin recomendaciones automáticas de contratación</span><span>✓ Sin datos personales ni almacenamiento</span></div></aside>
+    </div>
+    <div id="quick-result" class="result-card" aria-live="polite" hidden><span class="eyebrow">ORIENTACIÓN PRELIMINAR</span><h3>Estos son los puntos que conviene comprobar.</h3><ul id="quick-list" class="advice-list"></ul><p class="muted">No se ha calculado una potencia objetivo en kW, porque no hay medidas que la justifiquen.</p><button type="button" id="move-advanced" class="btn btn-primary">Ir al simulador con medidas ↗</button></div>
+  </section>
+
+  <section id="advanced-pane" role="tabpanel" aria-labelledby="tab-advanced" class="mode-pane" hidden>
+    <div class="warning-explain"><strong>Necesitas datos de potencia máxima demandada (kW).</strong> No introduzcas consumos mensuales (kWh) ni potencias nominales de los electrodomésticos. Puedes buscar las máximas por periodos en el portal de tu distribuidora o en tus facturas. <a href="https://www.cnmc.es/facil-para-ti/que-hace-la-cnmc-para-consumidores/comercializacion-y-suministro-electrico" target="_blank" rel="noopener noreferrer">Ver explicación de la CNMC ↗</a></div>
+    <form id="advanced-form" novalidate>
+      <fieldset class="panel">
+        <legend><span class="step">01</span> Tu contrato actual · 2.0TD</legend>
+        <div class="fields two">
+          <label>Potencia contratada P1 (kW) <sup>*</sup><input type="text" name="currentP1" inputmode="decimal" autocomplete="off" placeholder="Ej.: 4,6" required><small>Punta / llano: lunes a viernes, de 08:00 a 24:00</small></label>
+          <label>Potencia contratada P2 (kW) <sup>*</sup><input type="text" name="currentP2" inputmode="decimal" autocomplete="off" placeholder="Ej.: 5,75" required><small>Valle: noches, fines de semana y festivos nacionales</small></label>
+        </div>
+        <p class="fineprint">Este simulador solo contempla suministros 2.0TD con potencias contratadas de hasta 15 kW en ambos periodos. Las potencias P1 y P2 pueden ser distintas.</p>
+      </fieldset>
+
+      <fieldset class="panel">
+        <legend><span class="step">02</span> Máximas demandas registradas</legend>
+        <p class="panel-description">Introduce los máximos de <strong>12 meses completos consecutivos</strong>, P1 y P2 por separado. Deja en blanco lo que no conozcas: se mostrará que la información es incompleta, sin inventar valores.</p>
+        <label class="source-label">¿De dónde has obtenido las mediciones?
+        <select name="source"><option value="unknown" selected>No lo sé / aún no las tengo</option><option value="distribuidora">Portal de la distribuidora</option><option value="factura">Facturas eléctricas</option><option value="otro">Otra fuente</option></select></label>
+        <div class="annual-summary">
+          <h4>Opción rápida: máximas de los últimos 12 meses</h4>
+          <p class="panel-description">Si tu factura o distribuidora muestra directamente la máxima potencia demandada durante un año completo, puedes escribir solo estos dos datos. No hace falta rellenar la tabla inferior.</p>
+          <div class="fields two">
+            <label>Máxima anual P1 · kW<input type="text" name="annualMaxP1" inputmode="decimal" autocomplete="off" placeholder="Ej.: 3,8"></label>
+            <label>Máxima anual P2 · kW<input type="text" name="annualMaxP2" inputmode="decimal" autocomplete="off" placeholder="Ej.: 4,2"></label>
+          </div>
+          <label class="inline-check"><input type="checkbox" name="annualPeriodConfirmed"> He comprobado que ambos máximos corresponden a los últimos 12 meses completos y a los periodos de potencia P1/P2.</label>
+          <p class="fineprint">La aplicación no puede verificar por sí misma si el resumen procede de una fuente real ni si cubre exactamente ese periodo.</p>
+        </div>
+        <details class="monthly-details">
+          <summary>O introducir los máximos de cada mes (12 × P1 y P2)</summary>
+          <p class="panel-description">Los meses cerrados aparecen ordenados de más antiguo a más reciente. No mezcles kWh consumidos y kW demandados.</p>
+          <div class="table-scroll"><table class="history-table"><thead><tr><th scope="col">Mes cerrado</th><th scope="col">Máxima P1 · kW</th><th scope="col">Máxima P2 · kW</th></tr></thead><tbody id="month-rows"></tbody></table></div>
+        </details>
+        <div class="coverage" id="coverage-summary">0/12 meses completos introducidos</div>
+      </fieldset>
+
+      <fieldset class="panel">
+        <legend><span class="step">03</span> Condiciones que afectan al estudio</legend>
+        <div class="fields two">
+          <label>¿Ha saltado el limitador o ICP?<select name="cutoffs"><option value="unknown">No lo sé</option><option value="no">No</option><option value="yes">Sí</option></select></label>
+          <label>¿Han cambiado tus equipos o hábitos?<select name="changes"><option value="unknown">No lo sé</option><option value="no">No</option><option value="yes">Sí, recientemente</option></select></label>
+        </div>
+        <p class="fineprint">Si hay cortes, vehículos eléctricos, nuevos equipos o cambios en el uso de la vivienda, hay que revisarlos antes de reducir potencia.</p>
+      </fieldset>
+
+      <fieldset class="panel">
+        <legend><span class="step">04</span> Simula un escenario · opcional</legend>
+        <p class="panel-description">Elige tú las potencias que quieres estudiar. La aplicación <strong>no las propone automáticamente</strong>. Comprobará cómo encajan con los máximos registrados, si están completos.</p>
+        <div class="fields two">
+          <label>Potencia de prueba P1 (kW)<input type="text" name="targetP1" inputmode="decimal" autocomplete="off" placeholder="Ej.: 3,5"></label>
+          <label>Potencia de prueba P2 (kW)<input type="text" name="targetP2" inputmode="decimal" autocomplete="off" placeholder="Ej.: 4,6"></label>
+        </div>
+        <h4>¿Quieres comparar también el término fijo anual?</h4>
+        <div class="fields three">
+          <label>Unidad del precio<select name="priceUnit"><option value="day">€/kW/día</option><option value="year">€/kW/año</option></select></label>
+          <label>Precio total potencia P1<input type="text" name="priceP1" inputmode="decimal" autocomplete="off" placeholder="Sin inventar precios"></label>
+          <label>Precio total potencia P2<input type="text" name="priceP2" inputmode="decimal" autocomplete="off" placeholder="Según tu factura"></label>
+        </div>
+        <p class="fineprint">Deben introducirse los dos precios y las dos potencias de prueba para obtener una diferencia anual. Se mantiene el precio unitario aportado, se calculan 365 días y se excluyen impuestos, derechos y cambios futuros de precios.</p>
+      </fieldset>
+      <p id="advanced-error" class="form-error" role="alert" hidden></p>
+      <button class="btn btn-primary" type="submit">Evaluar mis datos <span aria-hidden="true">→</span></button>
+    </form>
+
+    <section id="advanced-result" class="result-card" aria-labelledby="results-heading" aria-live="polite" hidden>
+      <span class="eyebrow">INFORME DE EVALUACIÓN</span><h2 id="results-heading">Lo que sabemos y lo que no.</h2>
+      <div class="metrics">
+        <article class="metric"><span>Historial válido</span><strong id="out-months">—</strong><small>meses con máximas P1 y P2</small></article>
+        <article class="metric"><span>Máxima histórica P1</span><strong id="out-max-p1">—</strong><small>kW medidos, si hay 12 meses</small></article>
+        <article class="metric"><span>Máxima histórica P2</span><strong id="out-max-p2">—</strong><small>kW medidos, si hay 12 meses</small></article>
+        <article class="metric"><span>Diferencia anual de término fijo</span><strong id="out-cost">—</strong><small id="out-cost-detail">Pendiente de escenario y precios</small></article>
+      </div>
+      <div class="verdict" id="out-verdict"></div>
+      <div class="simulation-details" id="out-simulation" hidden>
+        <h3>Comparación del escenario elegido</h3>
+        <p id="out-sim-data"></p><p id="out-cost-data"></p>
+      </div>
+      <h3>Advertencias y decisiones pendientes</h3>
+      <ul id="out-warnings" class="advice-list"></ul>
+      <p class="muted">Los datos han sido introducidos por el usuario. No están conectados ni verificados con la distribuidora. Ningún escenario equivale a una autorización automática de cambio de contrato.</p>
+      <div class="result-cta"><div><h3>¿Quieres un análisis profesional?</h3><p>En Mejoradora Granada podemos revisar los datos junto con tu factura antes de tramitar nada.</p></div><a id="result-whatsapp" href="https://wa.me/34613685560" target="_blank" rel="noopener noreferrer" class="btn btn-white">Consultar por WhatsApp ↗</a></div>
+    </section>
+  </section>
+</div></section>
+
+<section class="closing"><div class="container closing-inner"><div><span class="eyebrow">EL RESULTADO IMPORTA</span><h2>Menos promesas. Más datos.</h2></div><p>Una optimización debe servir para decidir mejor, no para rellenar una cifra en pantalla. La potencia real depende de las necesidades, las incidencias y las condiciones del suministro.</p></div></section>
 </main>
 <footer><div class="container footer-inner"><div><strong>Mejoradora Granada</strong><small>Consultoría energética · Jedaes SC</small></div><nav aria-label="Enlaces legales"><a href="https://mejoradoragranada.es/aviso-legal">Aviso legal</a><a href="https://mejoradoragranada.es/privacidad">Privacidad</a><a href="https://mejoradoragranada.es/">Web principal ↗</a></nav></div></footer>
+<noscript><p>Necesitas activar JavaScript para utilizar esta herramienta.</p></noscript>
 </body></html>
