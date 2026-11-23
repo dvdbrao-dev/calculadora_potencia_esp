@@ -71,7 +71,21 @@
         <p class="panel-description">Introduce los máximos de <strong>12 meses completos consecutivos</strong>, P1 y P2 por separado. Deja en blanco lo que no conozcas: se mostrará que la información es incompleta, sin inventar valores.</p>
         <label class="source-label">¿De dónde has obtenido las mediciones?
         <select name="source"><option value="unknown" selected>No lo sé / aún no las tengo</option><option value="distribuidora">Portal de la distribuidora</option><option value="factura">Facturas eléctricas</option><option value="otro">Otra fuente</option></select></label>
-        <div class="table-scroll"><table class="history-table"><thead><tr><th scope="col">Mes cerrado</th><th scope="col">Máxima P1 · kW</th><th scope="col">Máxima P2 · kW</th></tr></thead><tbody id="month-rows"></tbody></table></div>
+        <div class="annual-summary">
+          <h4>Opción rápida: máximas de los últimos 12 meses</h4>
+          <p class="panel-description">Si tu factura o distribuidora muestra directamente la máxima potencia demandada durante un año completo, puedes escribir solo estos dos datos. No hace falta rellenar la tabla inferior.</p>
+          <div class="fields two">
+            <label>Máxima anual P1 · kW<input type="text" name="annualMaxP1" inputmode="decimal" autocomplete="off" placeholder="Ej.: 3,8"></label>
+            <label>Máxima anual P2 · kW<input type="text" name="annualMaxP2" inputmode="decimal" autocomplete="off" placeholder="Ej.: 4,2"></label>
+          </div>
+          <label class="inline-check"><input type="checkbox" name="annualPeriodConfirmed"> He comprobado que ambos máximos corresponden a los últimos 12 meses completos y a los periodos de potencia P1/P2.</label>
+          <p class="fineprint">La aplicación no puede verificar por sí misma si el resumen procede de una fuente real ni si cubre exactamente ese periodo.</p>
+        </div>
+        <details class="monthly-details">
+          <summary>O introducir los máximos de cada mes (12 × P1 y P2)</summary>
+          <p class="panel-description">Los meses cerrados aparecen ordenados de más antiguo a más reciente. No mezcles kWh consumidos y kW demandados.</p>
+          <div class="table-scroll"><table class="history-table"><thead><tr><th scope="col">Mes cerrado</th><th scope="col">Máxima P1 · kW</th><th scope="col">Máxima P2 · kW</th></tr></thead><tbody id="month-rows"></tbody></table></div>
+        </details>
         <div class="coverage" id="coverage-summary">0/12 meses completos introducidos</div>
       </fieldset>
 
