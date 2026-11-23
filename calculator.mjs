@@ -1,30 +1,130 @@
-// Estimación orientativa de demanda simultánea; no sustituye una medición.
-const choices={cocina:{gas:0,vitro:2.4,induccion:2.2},acs:{gas:0,termo:1.5,aerotermia:1.1},ve:{no:0,lenta:2.3,medio:3.7,alto:7.4}};
-function numeric(v,label,min,max){const n=Number(String(v).replace(",","."));if(v===""||v==null||!Number.isFinite(n)||n<min||n>max)throw new RangeError(label+": revisa el valor");return n}
-function option(key,v){if(!Object.hasOwn(choices[key],v))throw new RangeError("Opción no válida");return choices[key][v]}
-const up=x=>Math.ceil((x-1e-9)*10)/10;
-export function estimate(i){
-  const actualP1=numeric(i.actualP1,"Potencia punta",0.5,25);
-  const actualP2=i.actualP2===""||i.actualP2==null?actualP1:numeric(i.actualP2,"Potencia valle",0.5,25);
-  const personas=numeric(i.personas,"Personas",1,20),m2=numeric(i.m2,"Superficie",20,1000),motores=numeric(i.motores??0,"Motores",0,15);
-  if(!Number.isInteger(personas))throw new RangeError("El número de personas debe ser entero");
-  const cocina=option("cocina",i.cocina),acs=option("acs",i.acs),ve=option("ve",i.ve);
-  const clima=i.clima==="no"?0:i.clima==="aire"?Math.min(3.4,.7+.012*m2):i.clima==="radiadores"?Math.min(7,.032*m2):i.clima==="aerotermia"?Math.min(4.2,.8+.012*m2):NaN;
-  if(!Number.isFinite(clima)||!["normal","intenso"].includes(i.uso))throw new RangeError("Revisa las opciones");
-  const base=Math.min(1.7,.2+.075*personas+.0018*m2);
-  const cocinaBloque=cocina+Math.max(i.horno?1.2:0,i.micro?0.7:0);
-  const fijos=motores+(i.congelador?.15:0);
-  const cargas=[acs,i.lavadora?1.35:0,i.lavavajillas?1.45:0,i.secadora?1.9:0,i.piscina?.65:0].sort((a,b)=>b-a);
-  const simultaneas=cargas[0]+(i.uso==="intenso"?cargas[1]*.65:0);
-  const picoDia=base+cocinaBloque+clima+fijos+simultaneas;
-  // En fines de semana también hay periodo valle: P2 no debe estimarse inferior al pico diurno.
-  const picoValle=Math.max(picoDia,base+clima+fijos+ve+simultaneas);
-  const sugeridoP1=up(Math.max(.5,picoDia*1.10));
-  const sugeridoP2=up(Math.max(.5,picoValle*1.10));
-  let diferenciaAnual=null;
-  if(i.precioP1!==""&&i.precioP1!=null&&i.precioP2!==""&&i.precioP2!=null){
-    const pp1=numeric(i.precioP1,"Precio punta",0,5),pp2=numeric(i.precioP2,"Precio valle",0,5);
-    diferenciaAnual=Math.round((365*((actualP1-sugeridoP1)*pp1+(actualP2-sugeridoP2)*pp2)+Number.EPSILON)*100)/100;
+/**
+ * Motor de evaluación 2.0TD basado en datos introducidos por el usuario.
+ * NO estima la potencia "óptima" sumando electrodomésticos y NO prescribe
+ * cambios contractuales. Muestra evidencia histórica y simula costes.
+ * El usuario debe verificar que cada máximo sea potencia demandada (kW)
+ * del periodo de potencia correspondiente, no energía (kWh).
+ */
+export const MONTHS_REQUIRED=12;
+export const TARIFF_LIMIT_KW=15;
+export const REVIEW_BUFFER_KW=0.3; // Umbral orientativo de alerta; NO es margen reglamentario.
+
+export function parseDecimal(value,{name,min=0,max=30,allowEmpty=false}={}){
+  if(value===undefined||value===null||String(value).trim()===''){
+    if(allowEmpty)return null;
+    throw new RangeError((name||'Dato')+': valor obligatorio');
   }
-  return {actualP1,actualP2,sugeridoP1,sugeridoP2,picoDia:Math.round(picoDia*100)/100,picoValle:Math.round(picoValle*100)/100,diferenciaAnual,requiereEstudio:sugeridoP1>15||sugeridoP2>15,subida:sugeridoP1>actualP1||sugeridoP2>actualP2,bajada:sugeridoP1<actualP1&&sugeridoP2<actualP2,uso:i.uso};
+  const cleaned=String(value).trim().replace(',','.');
+  if(!/^\d+(?:\.\d+)?$/.test(cleaned))throw new RangeError((name||'Dato')+': utiliza un número válido');
+  const number=Number(cleaned);
+  if(!Number.isFinite(number)||number<min||number>max)throw new RangeError((name||'Dato')+': fuera de rango');
+  return number;
+}
+const money2 = n => Math.round((n+Number.EPSILON)*100)/100;
+const epsilon = 1e-9;
+
+export function assessHousehold(profile){
+  const flags=[];
+  const cooking=profile.cooking??'gas',hotWater=profile.hotWater??'gas';
+  const climate=profile.climate??'none',ev=profile.ev??'none';
+  if(!['gas','vitro','induccion'].includes(cooking)||!['gas','termo','aerotermia'].includes(hotWater)
+      ||!['none','aire','radiadores','aerotermia'].includes(climate)
+      ||!['none','schuko','wallbox'].includes(ev))throw new RangeError('Configuración de vivienda no válida');
+  if(ev!=='none')flags.push('Si cargas un vehículo eléctrico, revisa horario, límite del cargador y gestión dinámica de carga.');
+  if(climate==='radiadores')flags.push('La calefacción eléctrica resistiva puede concentrar consumos elevados en invierno.');
+  if(cooking!=='gas'&&hotWater!=='gas')flags.push('Cocina eléctrica y agua caliente eléctrica pueden coincidir: conviene comprobar la demanda real.');
+  if(climate==='aerotermia'||hotWater==='aerotermia')flags.push('Las bombas de calor modulan su consumo y pueden tener apoyos eléctricos: la etiqueta del sistema no permite deducir un pico fiable.');
+  if(profile.pool)flags.push('Bombas y motores pueden tener arranque y funcionamiento que requieran comprobación.');
+  if(flags.length===0)flags.push('Los equipos declarados no permiten determinar una potencia óptima. Comprueba las máximas demandas registradas.');
+  return {kind:'orientation',flags,hasPowerRecommendation:false,
+    message:'Este cuestionario orienta sobre qué revisar; no calcula kW contratables ni ahorros.'};
+}
+
+/** Evalúa doce meses completos, en orden cronológico (más antiguo -> reciente). */
+export function evaluate2TD(input){
+  const currentP1=parseDecimal(input.currentP1,{name:'Potencia actual P1',min:0.1,max:TARIFF_LIMIT_KW});
+  const currentP2=parseDecimal(input.currentP2,{name:'Potencia actual P2',min:0.1,max:TARIFF_LIMIT_KW});
+  const months=input.months;
+  if(!Array.isArray(months)||months.length!==MONTHS_REQUIRED){
+    throw new RangeError('Hay que incluir los 12 meses del historial, aunque falten datos en algunos.');
+  }
+  const measured=months.map((item,index)=>{
+    if(!item||typeof item!=='object')throw new RangeError('Mes '+(index+1)+': estructura inválida');
+    const p1=parseDecimal(item.p1,{name:'Mes '+(index+1)+' P1',min:0.01,max:30,allowEmpty:true});
+    const p2=parseDecimal(item.p2,{name:'Mes '+(index+1)+' P2',min:0.01,max:30,allowEmpty:true});
+    return {p1,p2,complete:p1!==null&&p2!==null};
+  });
+  const complete=measured.filter(m=>m.complete).length;
+  const full=complete===MONTHS_REQUIRED;
+  const maxP1=full?Math.max(...measured.map(m=>m.p1)):null;
+  const maxP2=full?Math.max(...measured.map(m=>m.p2)):null;
+  const hasOneCandidate=input.targetP1!==undefined&&input.targetP1!==null&&String(input.targetP1).trim()!==''
+    ||input.targetP2!==undefined&&input.targetP2!==null&&String(input.targetP2).trim()!=='';
+  let targetP1=null,targetP2=null;
+  if(hasOneCandidate){
+    targetP1=parseDecimal(input.targetP1,{name:'Escenario P1',min:0.1,max:TARIFF_LIMIT_KW});
+    targetP2=parseDecimal(input.targetP2,{name:'Escenario P2',min:0.1,max:TARIFF_LIMIT_KW});
+  }
+  const hasOnePrice=input.priceP1!==undefined&&input.priceP1!==null&&String(input.priceP1).trim()!==''
+    ||input.priceP2!==undefined&&input.priceP2!==null&&String(input.priceP2).trim()!=='';
+  const priceUnit=input.priceUnit??'day';
+  if(!['day','year'].includes(priceUnit))throw new RangeError('Unidad de precio desconocida');
+  let priceP1=null,priceP2=null;
+  if(hasOnePrice){
+    const priceMax=priceUnit==='day'?5:1800;
+    priceP1=parseDecimal(input.priceP1,{name:'Precio potencia P1',min:0,max:priceMax});
+    priceP2=parseDecimal(input.priceP2,{name:'Precio potencia P2',min:0,max:priceMax});
+  }
+  const source=input.source??'unknown';
+  if(!['unknown','distribuidora','factura','otro'].includes(source))throw new RangeError('Origen del historial inválido');
+  const cutoffs=input.cutoffs??'unknown',changes=input.changes??'unknown';
+  if(!['yes','no','unknown'].includes(cutoffs)||!['yes','no','unknown'].includes(changes))throw new RangeError('Revisa las incidencias');
+  const warnings=[];
+  if(!full)warnings.push('Historial incompleto: '+complete+'/12 meses con máximas P1 y P2. No se puede comprobar el escenario frente a un año completo.');
+  if(source==='unknown')warnings.push('Indica si los máximos proceden de la distribuidora o de las facturas; no se han verificado externamente.');
+  if(source==='otro')warnings.push('Confirma que los valores sean máximas demandas por periodo expresadas en kW; las curvas de consumo en kWh no son equivalentes.');
+  if(cutoffs==='yes')warnings.push('Hay cortes o actuaciones del control de potencia: requiere diagnóstico antes de modificar el contrato.');
+  if(cutoffs==='unknown')warnings.push('No consta si ha habido disparos del control de potencia.');
+  if(changes==='yes')warnings.push('La instalación o los hábitos han cambiado: el historial podría no representar la demanda futura.');
+  if(changes==='unknown')warnings.push('No consta si han cambiado las cargas o los hábitos.');
+
+  let scenario=null;
+  if(targetP1!==null&&targetP2!==null){
+    let peakCheck='sin-historial';
+    let deltaP1=null,deltaP2=null;
+    if(full){
+      deltaP1=money2(targetP1-maxP1);
+      deltaP2=money2(targetP2-maxP2);
+      if(deltaP1 < -epsilon || deltaP2 < -epsilon){
+        peakCheck='picos-superiores';
+        warnings.push('Al menos un máximo histórico supera la potencia del escenario. Esto no demuestra que se produzca un corte, pero exige revisión técnica.');
+      }else if(deltaP1 < REVIEW_BUFFER_KW-epsilon || deltaP2 < REVIEW_BUFFER_KW-epsilon){
+        peakCheck='margen-estrecho';
+        warnings.push('En algún periodo la distancia hasta el máximo observado es inferior a 0,3 kW; es una alerta orientativa, no un umbral legal.');
+      }else{
+        peakCheck='sin-superacion-observada';
+        warnings.push('No aparecen picos superiores al escenario en el historial facilitado. Esto NO garantiza ausencia de cortes futuros.');
+      }
+    }
+    let currentYear=null,scenarioYear=null,differenceYear=null;
+    if(priceP1!==null&&priceP2!==null){
+      const factor=priceUnit==='day'?365:1;
+      currentYear=money2(factor*(currentP1*priceP1+currentP2*priceP2));
+      scenarioYear=money2(factor*(targetP1*priceP1+targetP2*priceP2));
+      differenceYear=money2(currentYear-scenarioYear);
+    }
+    scenario={targetP1,targetP2,peakCheck,deltaP1,deltaP2,
+      currentYear,scenarioYear,differenceYear,
+      isAutomaticRecommendation:false};
+    if(targetP1>currentP1||targetP2>currentP2){
+      warnings.push('El escenario aumenta potencia en algún periodo. Un aumento puede generar costes adicionales y exige revisar condiciones.');
+    }
+  }
+  return {
+    tariff:'2.0TD',currentP1,currentP2,historyMonths:complete,fullHistory:full,
+    maxP1,maxP2,source,cutoffs,changes,warnings,scenario,
+    hasAutomaticRecommendation:false,
+    status:!full?'datos-insuficientes':(!scenario?'historial-completo':scenario.peakCheck),
+    note:'El historial ha sido introducido por el usuario y no se verifica contra la distribuidora. Ningún resultado es orden de cambio de potencia.'
+  };
 }
