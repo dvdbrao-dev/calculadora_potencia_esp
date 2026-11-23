@@ -28,3 +28,10 @@ test('se cargan los ficheros estáticos correctos',()=>{
  assert.ok(app.includes("from './calculator.mjs'"));
  assert.ok(css.includes('.mode-tab'));
 });
+
+test('opción de resumen anual accesible y expresamente confirmada',()=>{
+ for(const field of ['name="annualMaxP1"','name="annualMaxP2"','name="annualPeriodConfirmed"','id="month-rows"']){
+  assert.ok(html.includes(field),'Falta '+field);
+ }
+ assert.ok(html.includes('La aplicación no puede verificar por sí misma'));
+});
