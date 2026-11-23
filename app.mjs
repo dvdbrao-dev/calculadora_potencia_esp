@@ -72,7 +72,13 @@ function collectHistory(data){
 function updateCoverage(){
   const data=new FormData($('#advanced-form'));
   const count=collectHistory(data).filter(m=>String(m.p1).trim()!==''&&String(m.p2).trim()!=='').length;
-  write('#coverage-summary',count+'/12 meses con ambos valores introducidos. '+(count===12?'Comprueba que sean datos reales en kW.':'Los meses incompletos no se usarán para evaluar máximos anuales.'));
+  const annualP1=String(data.get('annualMaxP1')??'').trim();
+  const annualP2=String(data.get('annualMaxP2')??'').trim();
+  if(annualP1&&annualP2&&data.has('annualPeriodConfirmed')){
+    write('#coverage-summary','Has declarado un resumen anual de 12 meses. Revisaremos las cifras y el origen al evaluar. '+(count>0?'También hay '+count+'/12 meses detallados en la tabla.':''));
+  }else{
+    write('#coverage-summary',count+'/12 meses detallados completos. '+(count===12?'Comprueba que sean valores reales en kW.':'Si dispones del resumen anual, completa los dos máximos y marca la confirmación.'));
+  }
 }
 
 $('#advanced-form').addEventListener('input',()=>{
@@ -102,7 +108,7 @@ $('#advanced-form').addEventListener('submit',event=>{
     $('#advanced-error').scrollIntoView({behavior:'smooth',block:'center'});
     return;
   }
-  write('#out-months',report.historyMonths+'/12');
+  write('#out-months',report.dataMode==='resumen-anual'?'Resumen anual':report.historyMonths+'/12');
   write('#out-max-p1',report.fullHistory?fmt(report.maxP1):'No evaluable');
   write('#out-max-p2',report.fullHistory?fmt(report.maxP2):'No evaluable');
   const scenario=report.scenario;
