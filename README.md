@@ -9,8 +9,9 @@ Recibe información de cocina, ACS, climatización, vehículo eléctrico y bomba
 
 ### Modo 2 · Análisis de máximas demandas (2.0TD)
 - Introducción manual de potencias contratadas **P1 y P2 independientes**, de 0,1 a 15 kW.
-- Captura por meses cerrados de los **máximos de potencia demandada, en kW**, para cada uno de los dos periodos de potencia, idealmente procedentes de la distribuidora; **no** sirven kWh/mes ni potencias nominales.
-- Para comparar contra los máximos anuales se necesitan **12 meses completos**. Si faltan, muestra cobertura incompleta e impide comparar el escenario con el año.
+- Opción rápida: escribir los **dos máximos anuales demandados (P1 y P2)** cuando una factura o distribuidora los identifique expresamente como correspondientes a los últimos 12 meses completos, con confirmación manual de esa cobertura. La app no verifica su origen.
+- Opción detallada: capturar los **12 meses cerrados de máximos de potencia demandada, en kW** por periodo. **No** sirven kWh/mes ni potencias nominales.
+- Para comparar contra los máximos anuales se necesita **una serie de 12 meses completos** o **un resumen explícito de máximos de 12 meses confirmado por el usuario**. Sin ambas evidencias, indica cobertura insuficiente e impide dar la comparación por comprobada.
 - El cliente puede escribir un **escenario hipotético P1/P2**, que no es generado automáticamente ni es recomendación de contratación.
 - El escenario se clasifica como: superioridad de uno o varios máximos observados sobre la potencia simulada; distancia inferior a 0,3 kW en algún periodo (alerta indicativa **no reglamentaria**); o ningún máximo superior en el historial introducido (sin garantía futura).
 - Se pregunta por cortes del ICP y cambios recientes de equipos/hábitos.
@@ -18,7 +19,7 @@ Recibe información de cocina, ACS, climatización, vehículo eléctrico y bomba
 
 ## Limitaciones esenciales
 
-1. **Las mediciones son introducidas manualmente y no verificadas** con datos de la distribuidora. El sistema no identifica datos inventados, errores de transcripción, meses omitidos ni si son picos adecuados para el control de potencia. La etiqueta «12/12» solo significa «12 filas cumplimentadas y numéricamente válidas».
+1. **Las mediciones son introducidas manualmente y no verificadas** con datos de la distribuidora. El sistema no identifica datos inventados, errores de transcripción, meses omitidos ni si son picos adecuados para el control de potencia. La etiqueta «12/12» solo significa «12 filas cumplimentadas y numéricamente válidas»; «Resumen anual» significa dos cifras y cobertura de 12 meses declaradas por el usuario.
 2. Máximos registrados no equivalen a garantía de que una potencia no cause cortes; influyen la duración de los picos, tipo y tolerancia de limitador, cargas futuras y contexto de instalación.
 3. La diferencia de 0,3 kW usada como aviso de cercanía al máximo es **criterio de interfaz/cribado**, no norma ni margen profesional calibrado.
 4. La evaluación NO optimiza por curvas cuarto-horarias ni calcula probabilidades, percentiles, demanda simultánea real, ni coste de sobrepasar potencia.
